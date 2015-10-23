@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/sounds">
+        <file>resources/Star Wars Battle Theme FULL.mp3</file>
+        <file>resources/Space Battle Background.mp3</file>
+    </qresource>
+</RCC>

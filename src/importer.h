@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+
 #define Ponto glm::vec3
 #define Face glm::vec3
 #define Textura glm::vec2

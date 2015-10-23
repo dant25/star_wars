@@ -10,10 +10,37 @@
 #include <QGridLayout>
 #include <sys/time.h>
 
+#include <phonon/phonon>
 
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer  | QGL::SampleBuffers | QGL::StencilBuffer), parent)
 {
+    /*
+    Phonon::MediaObject *mediaObject = new Phonon::MediaObject();
+    Phonon::MediaObject *metaInformationResolver;
+    Phonon::AudioOutput *audioOutput;
+
+    QString fileName(":/sounds/resources/Star Wars Battle Theme FULL.mp3");
+    mediaObject->setCurrentSource(fileName);
+    audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
+    mediaObject = new Phonon::MediaObject(this);
+    audioOutput->setVolume(100.0f);
+    Phonon::createPath(mediaObject, audioOutput);
+    mediaObject->play();
+*/
+
+    Phonon::MediaSource fundo = Phonon::MediaSource(":/sounds/resources/Star Wars Battle Theme FULL.mp3");
+    Phonon::MediaSource tiros = Phonon::MediaSource(":/sounds/resources/Space Battle Background.mp3");
+
+    Phonon::MediaObject *music =
+            Phonon::createPlayer(Phonon::MusicCategory, fundo);
+    music->play();
+
+    Phonon::MediaObject *war =
+            Phonon::createPlayer(Phonon::MusicCategory, tiros);
+    war->play();
+
+
     // setup gCamera
     gCamera.setPosition(glm::vec3(9,10,108));
     gCamera.setVerticalAngle(0.0);
@@ -25,16 +52,16 @@ GLWidget::GLWidget(QWidget *parent)
     // setup lights
     Light spotlight;
     spotlight.position = glm::vec4(-4,0,10,1);
-    spotlight.intensities = glm::vec3(2,2,2); //strong white light
+    spotlight.intensities = glm::vec3(1,1,1); //strong white light
     spotlight.attenuation = 0.1f;
     spotlight.ambientCoefficient = 0.0f; //no ambient light
     spotlight.coneAngle = 15.0f;
     spotlight.coneDirection = glm::vec3(0,0,-1);
 
     Light directionalLight;
-    directionalLight.position = glm::vec4(1, 0.8, 0.6, 0); //w == 0 indications a directional light
-    //directionalLight.intensities = glm::vec3(0.4,0.3,0.1); //weak yellowish light
-    directionalLight.intensities = glm::vec3(0.7, 0.7, 0.7);
+    directionalLight.position = glm::vec4(150, 80, 30, 0); //w == 0 indications a directional light
+    directionalLight.attenuation = 0.1f;
+    directionalLight.intensities = glm::vec3(1.0, 1.0, 1.0);
     directionalLight.ambientCoefficient = 0.3;
 
     gLights.push_back(spotlight);
@@ -104,28 +131,28 @@ void GLWidget::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
-    LoadOBJ( "../../resources/Nave.obj", "../../resources/metal.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
-             0, 100.0, glm::vec3(0.7f, 0.7f, 0.7f), false );
+    LoadOBJ( "../../resources/Nave.obj", "../../resources/silver.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 100.0, glm::vec3(0.5f, 0.5f, 0.5f), true );
 
     LoadOBJ( "../../resources/Rebelde.obj", "../../resources/metal2.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
-             0, 800.0, glm::vec3(1.0f, 1.0f, 1.0f), false );
+             0, 800.0, glm::vec3(1.0f, 1.0f, 1.0f), true );
 
     LoadOBJ( "../../resources/Tie.obj", "../../resources/dark.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
-             0, 1.0, glm::vec3(1.0f, 1.0f, 1.0f), false );
+             0, 1.0, glm::vec3(1.0f, 1.0f, 1.0f), true );
 
-    LoadOBJ( "../../resources/Xwing.obj", "../../resources/branco.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
-             0, 500.0, glm::vec3(0.5f, 0.5f, 0.5f), false );
+    LoadOBJ( "../../resources/Xwing.obj", "../../resources/xwing.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 500.0, glm::vec3(0.5f, 0.5f, 0.5f), true );
 
     LoadOBJ( "../../resources/DeathStar.obj", "../../resources/metal5.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
              0, 500.0, glm::vec3(0.5f, 0.5, 0.5f), true );
 
-    LoadOBJ( "../../resources/Executor.obj", "../../resources/silver.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
-             0, 100.0, glm::vec3(1.0f, 1.0f, 1.0f), false );
+    LoadOBJ( "../../resources/Executor.obj", "../../resources/executor.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 100.0, glm::vec3(1.0f, 1.0f, 1.0f), true );
 
-    LoadOBJ( "../../resources/Frigate.obj", "../../resources/metal2.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
-             0, 200.0, glm::vec3(0.6f, 0.6f, 0.6f), false );
+    LoadOBJ( "../../resources/Frigate.obj", "../../resources/metal5.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 200.0, glm::vec3(0.6f, 0.6f, 0.6f), true );
 
-    LoadOBJ( "../../resources/Lua.obj", "../../resources/lua.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+    LoadOBJ( "../../resources/Lua.obj", "../../resources/terra.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
              0, 800.0, glm::vec3(0.3f, 0.3f, 0.3f), true );
 
     LoadOBJ( "../../resources/Globo.obj", "../../resources/galaxia.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
@@ -136,6 +163,12 @@ void GLWidget::initializeGL()
 
     LoadOBJ( "../../resources/Laser.obj", "../../resources/laser_rebel.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
              0, 100.0, glm::vec3(1.0f, 1.0f, 1.0f), true );
+
+    LoadOBJ( "../../resources/Falcon.obj", "../../resources/falcplan.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 100.0, glm::vec3(0.7f, 0.7f, 0.7f), true );
+
+    LoadOBJ( "../../resources/Lua.obj", "../../resources/lua.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 800.0, glm::vec3(0.3f, 0.3f, 0.3f), true );
 
     CreateInstances();
 
@@ -409,9 +442,14 @@ void GLWidget::LoadOBJ(const char*  arquivo, const char*  textura, const char*  
 
 void GLWidget::CreateInstances() {
 
+    ModelInstance terra;
+    terra.asset = &this->modelos[7];
+    terra.transform =  translate(100,0,-90) * scale(20.0, 20.0, 20.0);// * rotate(0,1,0, 135) ;
+    gInstances.push_back(terra);
+
     ModelInstance lua;
-    lua.asset = &this->modelos[7];
-    lua.transform =  translate(100,0,-90) * scale(20.0, 20.0, 20.0);// * rotate(0,1,0, 135) ;
+    lua.asset = &this->modelos[12];
+    lua.transform =  translate(100,40,-90) * scale(3.0, 3.0, 3.0);// * rotate(0,1,0, 135) ;
     gInstances.push_back(lua);
 
     ModelInstance blobo;
@@ -575,6 +613,12 @@ void GLWidget::CreateInstances() {
     frigate02.transform =  translate(0,-5,63) * scale(9.0, 9.0, 9.0) * rotate(0,1,0, 135);
     gInstances.push_back(frigate02);
     rebeldes.push_back(frigate02);    
+
+    ModelInstance falcon;
+    falcon.asset = &this->modelos[11];
+    falcon.transform =  translate(20,15, 50) * scale(0.5, 0.5, 0.5) * rotate(0,1,0, 135);
+    gInstances.push_back(falcon);
+    rebeldes.push_back(falcon);
 }
 
 void GLWidget::CalculaLaser()
