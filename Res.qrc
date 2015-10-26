@@ -2,5 +2,8 @@
     <qresource prefix="/sounds">
         <file>resources/Star Wars Battle Theme FULL.mp3</file>
         <file>resources/Space Battle Background.mp3</file>
+        <file>resources/X Wing Ambient Engine Sound.mp3</file>
+        <file>resources/Imperial Alert - Siren Sound.mp3</file>
+        <file>resources/TIE Fighter roar.mp3</file>
     </qresource>
 </RCC>

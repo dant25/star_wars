@@ -10,8 +10,6 @@
 #include <QGridLayout>
 #include <sys/time.h>
 
-#include <phonon/phonon>
-
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer  | QGL::SampleBuffers | QGL::StencilBuffer), parent)
 {
@@ -31,14 +29,21 @@ GLWidget::GLWidget(QWidget *parent)
 
     Phonon::MediaSource fundo = Phonon::MediaSource(":/sounds/resources/Star Wars Battle Theme FULL.mp3");
     Phonon::MediaSource tiros = Phonon::MediaSource(":/sounds/resources/Space Battle Background.mp3");
+    Phonon::MediaSource xWingSound = Phonon::MediaSource(":/sounds/resources/X Wing Ambient Engine Sound.mp3");
+    Phonon::MediaSource tieFighterSound = Phonon::MediaSource(":/sounds/resources/TIE Fighter roar.mp3");
+    Phonon::MediaSource empireAlertSound = Phonon::MediaSource(":/sounds/resources/Imperial Alert - Siren Sound.mp3");
 
-    Phonon::MediaObject *music =
-            Phonon::createPlayer(Phonon::MusicCategory, fundo);
+    music = Phonon::createPlayer(Phonon::MusicCategory, fundo);
     music->play();
 
-    Phonon::MediaObject *war =
-            Phonon::createPlayer(Phonon::MusicCategory, tiros);
+    war = Phonon::createPlayer(Phonon::MusicCategory, tiros);
     war->play();
+
+    xWing_Sound = Phonon::createPlayer(Phonon::MusicCategory, xWingSound);
+
+    tieFighter_Sound = Phonon::createPlayer(Phonon::MusicCategory, tieFighterSound);
+
+    empire_Alert_Sound = Phonon::createPlayer(Phonon::MusicCategory, empireAlertSound);
 
 
     // setup gCamera
@@ -78,6 +83,11 @@ GLWidget::GLWidget(QWidget *parent)
 
 GLWidget::~GLWidget()
 {
+    delete music;
+    delete war;
+    delete xWing_Sound;
+    delete tieFighter_Sound;
+    delete empire_Alert_Sound;
 }
 
 // convenience function that returns a translation matrix
@@ -255,7 +265,6 @@ void GLWidget::simStep()
     }
 
 
-
     if(fix_cam)        // setup gCamera
     {
         double t = 1.5;
@@ -266,6 +275,36 @@ void GLWidget::simStep()
         gCamera.setPosition( glm::vec3(reb.front().transform[3][0], reb.front().transform[3][1], reb.front().transform[3][2]) + pos );
         gCamera.lookAt( glm::vec3(imp.front().transform[3][0], imp.front().transform[3][1], imp.front().transform[3][2]) );
     }
+
+
+    ///SOM DA TIE FIGHTER PASSANDO
+    glm::vec3 posReb = glm::vec3(reb.front().transform[3][0], reb.front().transform[3][1], reb.front().transform[3][2]);
+    glm::vec3 posEmp = glm::vec3(imp.back().transform[3][0], imp.back().transform[3][1], imp.back().transform[3][2]);
+
+    if( glm::abs(posEmp.x - posReb.x) < 10.0 &&
+        glm::abs(posEmp.y - posReb.y) < 10.0 &&
+        glm::abs(posEmp.z - posReb.z) < 10.0 &&
+        fix_cam )
+    {
+        tieFighter_Sound->play();
+    }
+
+    if(fix_cam)
+        xWing_Sound->play();
+
+
+    glm::vec3 posExecutor = glm::vec3(imperio.back().transform[3][0], imperio.back().transform[3][1], imperio.back().transform[3][2]);
+    glm::vec3 distan = posExecutor - gCamera.position();
+
+    if( glm::abs(distan.x) < 60.0 &&
+        glm::abs(distan.y) < 60.0 &&
+        glm::abs(distan.z) < 60.0 )
+    {
+        empire_Alert_Sound->play();
+    }
+    else
+        empire_Alert_Sound->stop();
+
 
 
     gettimeofday(&tempo_fim,NULL);
@@ -696,7 +735,7 @@ void GLWidget::CalculaLaser()
 
         Raio r;
         r.laser = laser;
-        r.delta = ( glm::vec3(delta.x*1.2, delta.y*1.2, delta.z*1.2) );
+        r.delta = ( glm::vec3(delta.x*2.0, delta.y*2.0, delta.z*2.0) );
         if( fonte == 0 )
         {
             r.chegada = posReb;
@@ -813,6 +852,7 @@ void GLWidget::CalculaLaser()
             r.chegada = posEmp;
         }
 
+
         lasers.push_back(r);
     }
 
@@ -840,7 +880,7 @@ void GLWidget::AtualizaLaser()
 
     lasers = temp;
 
-    if(lasers.size() <= 9)
+    if(lasers.size() <= 12)
     {
         CalculaLaser();
     }
@@ -1007,7 +1047,14 @@ void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
 
         case Qt::Key_5:
         {
+
             fix_cam = !fix_cam;
+
+            if(fix_cam)
+                xWing_Sound->play();
+            else
+                xWing_Sound-> stop();
+
             break;
         }
 

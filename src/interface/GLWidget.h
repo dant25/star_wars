@@ -24,6 +24,7 @@
 #include <sstream>
 using namespace std;
 
+#include <phonon/phonon>
 
 // tdogl classes
 #include "Program.h"
@@ -107,6 +108,11 @@ private:
     double rotNave;
 
     bool fix_cam;
+    Phonon::MediaObject *music;
+    Phonon::MediaObject *war;
+    Phonon::MediaObject *xWing_Sound;
+    Phonon::MediaObject *tieFighter_Sound;
+    Phonon::MediaObject *empire_Alert_Sound;
 
     std::vector<Light> gLights;
 
