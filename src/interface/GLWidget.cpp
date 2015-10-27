@@ -34,10 +34,8 @@ GLWidget::GLWidget(QWidget *parent)
     Phonon::MediaSource empireAlertSound = Phonon::MediaSource(":/sounds/resources/Imperial Alert - Siren Sound.mp3");
 
     music = Phonon::createPlayer(Phonon::MusicCategory, fundo);
-    music->play();
 
     war = Phonon::createPlayer(Phonon::MusicCategory, tiros);
-    war->play();
 
     xWing_Sound = Phonon::createPlayer(Phonon::MusicCategory, xWingSound);
 
@@ -47,12 +45,12 @@ GLWidget::GLWidget(QWidget *parent)
 
 
     // setup gCamera
-    gCamera.setPosition(glm::vec3(9,10,108));
+    gCamera.setPosition(glm::vec3(9,20,108));
     gCamera.setVerticalAngle(0.0);
     gCamera.setHorizontalAngle(0.0);
     gCamera.setViewportAspectRatio(screen_size.x / screen_size.y);
     gCamera.setNearAndFarPlanes(0.1f, 800.0f);
-    //gCamera.lookAt(glm::vec3(0,0,0));
+    gCamera.lookAt(glm::vec3(10,7,0));
 
     // setup lights
     Light spotlight;
@@ -66,7 +64,7 @@ GLWidget::GLWidget(QWidget *parent)
     Light directionalLight;
     directionalLight.position = glm::vec4(150, 80, 30, 0); //w == 0 indications a directional light
     directionalLight.attenuation = 0.1f;
-    directionalLight.intensities = glm::vec3(1.0, 1.0, 1.0);
+    directionalLight.intensities = glm::vec3(0.9, 0.9, 1.0);
     directionalLight.ambientCoefficient = 0.3;
 
     gLights.push_back(spotlight);
@@ -95,7 +93,7 @@ glm::mat4 translate(GLfloat x, GLfloat y, GLfloat z) {
     return glm::translate(glm::mat4(), glm::vec3(x,y,z));
 }
 
-// convenience function that returns a scaling matrix
+// convenience function that returns a scaling matrixa
 glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
     return glm::scale(glm::mat4(), glm::vec3(x,y,z));
 }
@@ -233,9 +231,11 @@ void GLWidget::simStep()
     timeval tempo_inicio,tempo_fim;
     gettimeofday(&tempo_inicio,NULL);
 
-    //o que tu vai desenhar
+    ///ATUALIZANDO OS LASERS
     AtualizaLaser();
 
+
+    ///ROTACIONANDO OBJETOS
     rotLua += 0.005;
 
     if(rotLua > 2.0*M_PI)
@@ -251,7 +251,11 @@ void GLWidget::simStep()
     std::list<ModelInstance>::iterator it;
     for(it = imp.begin(); it != imp.end(); ++it)
     {
-        (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90 - count,0 - count,10 - count)
+        if(count%2 == 0)
+            (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90 - count,0 - count,10 - count)
+                                * scale(1.5, 1.5, 1.5) * rotate(0.0, 0.0, 1.0, 10*rotLua);
+        else
+            (*it).transform = translate(-40 - count/2.0,0 - count/2.0,-110 - count/2.0) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90 - count/2.0,0 - count/2.0,10 - count/2.0)
                                 * scale(1.5, 1.5, 1.5) * rotate(0.0, 0.0, 1.0, 10*rotLua);
         count +=5;
     }
@@ -259,52 +263,62 @@ void GLWidget::simStep()
     count =0;
     for(it = reb.begin(); it != reb.end(); ++it)
     {
-        (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count,0 - count,0 - count)
+//        (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count,0 - count,0 - count)
+//                                * scale(0.8, 0.8, 0.8) * rotate(0.0, 1.0, 0.0, 3.1415) * rotate(0.0, 0.0, 1.0, rotNave);
+        if(count%2 == 0)
+            (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count,0 - count,0 - count)
                                 * scale(0.8, 0.8, 0.8) * rotate(0.0, 1.0, 0.0, 3.1415) * rotate(0.0, 0.0, 1.0, rotNave);
-         count +=5;
+        else
+        {
+            (*it).transform = translate(-40 - count/2.0,0 - count/2.0,-110 - count/2.0) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count/2.0,0 - count/2.0,0 - count/2.0)
+                                * scale(0.8, 0.8, 0.8) * rotate(0.0, 1.0, 0.0, 3.1415) * rotate(0.0, 0.0, 1.0, rotNave);
+        }
+
+        count +=5;
     }
 
+//std::cout << gCamera.position().x << " " << gCamera.position().y << " " << gCamera.position().z << std::endl;
 
-    if(fix_cam)        // setup gCamera
-    {
-        double t = 1.5;
-        glm::vec3 pos(t*( reb.front().transform[3][0] - imp.front().transform[3][0] ),
-                3+t*( reb.front().transform[3][1] - imp.front().transform[3][1] ),
-                t*( reb.front().transform[3][2] - imp.front().transform[3][2] ) );
-
-        gCamera.setPosition( glm::vec3(reb.front().transform[3][0], reb.front().transform[3][1], reb.front().transform[3][2]) + pos );
-        gCamera.lookAt( glm::vec3(imp.front().transform[3][0], imp.front().transform[3][1], imp.front().transform[3][2]) );
-    }
-
-
-    ///SOM DA TIE FIGHTER PASSANDO
-    glm::vec3 posReb = glm::vec3(reb.front().transform[3][0], reb.front().transform[3][1], reb.front().transform[3][2]);
-    glm::vec3 posEmp = glm::vec3(imp.back().transform[3][0], imp.back().transform[3][1], imp.back().transform[3][2]);
-
-    if( glm::abs(posEmp.x - posReb.x) < 10.0 &&
-        glm::abs(posEmp.y - posReb.y) < 10.0 &&
-        glm::abs(posEmp.z - posReb.z) < 10.0 &&
-        fix_cam )
-    {
-        tieFighter_Sound->play();
-    }
-
+    ///REPOSICIONANDO A CAMERA
     if(fix_cam)
-        xWing_Sound->play();
-
-
-    glm::vec3 posExecutor = glm::vec3(imperio.back().transform[3][0], imperio.back().transform[3][1], imperio.back().transform[3][2]);
-    glm::vec3 distan = posExecutor - gCamera.position();
-
-    if( glm::abs(distan.x) < 60.0 &&
-        glm::abs(distan.y) < 60.0 &&
-        glm::abs(distan.z) < 60.0 )
     {
-        empire_Alert_Sound->play();
-    }
-    else
-        empire_Alert_Sound->stop();
+        std::list<ModelInstance>::iterator itR = reb.begin(); itR++;
+        std::list<ModelInstance>::iterator itE = imp.begin(); itE++;
+        double t = 1.5;
+        glm::vec3 pos(t*( (*itR).transform[3][0] - (*itE).transform[3][0] ),
+                3+t*( (*itR).transform[3][1] - (*itE).transform[3][1] ),
+                t*( (*itR).transform[3][2] - (*itE).transform[3][2] ) );
 
+        gCamera.setPosition( glm::vec3((*itR).transform[3][0], (*itR).transform[3][1], (*itR).transform[3][2]) + pos );
+        gCamera.lookAt( glm::vec3((*itE).transform[3][0], (*itE).transform[3][1], (*itE).transform[3][2]) );
+    }
+
+
+    ///SONS DA ANIMAÇÂO
+    {
+        glm::vec3 posReb = glm::vec3(reb.front().transform[3][0], reb.front().transform[3][1], reb.front().transform[3][2]);
+        glm::vec3 posEmp = glm::vec3(imp.back().transform[3][0], imp.back().transform[3][1], imp.back().transform[3][2]);
+
+        if( glm::abs(posEmp.x - posReb.x) < 8.0 && glm::abs(posEmp.y - posReb.y) < 8.0 && glm::abs(posEmp.z - posReb.z) < 8.0 &&
+            fix_cam )
+        {
+            tieFighter_Sound->play();
+        }
+
+        glm::vec3 posExecutor = glm::vec3(imperio.back().transform[3][0], imperio.back().transform[3][1], imperio.back().transform[3][2]);
+        glm::vec3 distan = posExecutor - gCamera.position();
+
+        if( glm::abs(distan.x) < 60.0 && glm::abs(distan.y) < 60.0 && glm::abs(distan.z) < 60.0 )
+            empire_Alert_Sound->play();
+        else
+            empire_Alert_Sound->stop();
+
+        if(fix_cam)
+            xWing_Sound->play();
+
+        war->play();
+        music->play();
+    }
 
 
     gettimeofday(&tempo_fim,NULL);
@@ -547,6 +561,16 @@ void GLWidget::CreateInstances() {
     tie00.transform =  translate(-70,0,0) * scale(1.5, 1.5, 1.5);
     imp.push_back(tie00);
 
+    ModelInstance tie000; //== ANIMAÇÃO
+    tie000.asset = &this->modelos[2];
+    tie000.transform =  translate(-70,0,0) * scale(1.5, 1.5, 1.5);
+    imp.push_back(tie000);
+
+    ModelInstance tie0000; //== ANIMAÇÃO
+    tie0000.asset = &this->modelos[2];
+    tie0000.transform =  translate(-70,0,0) * scale(1.5, 1.5, 1.5);
+    imp.push_back(tie0000);
+
     ModelInstance tie01;
     tie01.asset = &this->modelos[2];
     tie01.transform =  translate(0,-2,0) * scale(1.5, 1.5, 1.5);
@@ -599,6 +623,16 @@ void GLWidget::CreateInstances() {
     xWing00.transform =  translate(5,-6,35) * scale(0.8, 0.8, 0.8);
     reb.push_back(xWing00);
 
+    ModelInstance xWing000; //== ANIMAÇÃO
+    xWing000.asset = &this->modelos[3];
+    xWing000.transform =  translate(5,-6,35) * scale(0.8, 0.8, 0.8);
+    reb.push_back(xWing000);
+
+    ModelInstance xWing0000; //== ANIMAÇÃO
+    xWing0000.asset = &this->modelos[3];
+    xWing0000.transform =  translate(5,-6,35) * scale(0.8, 0.8, 0.8);
+    reb.push_back(xWing0000);
+
     ModelInstance xWing01;
     xWing01.asset = &this->modelos[3];
     xWing01.transform =  translate(5,-6,35) * scale(0.8, 0.8, 0.8);
@@ -637,7 +671,7 @@ void GLWidget::CreateInstances() {
 
     ModelInstance executor;
     executor.asset = &this->modelos[5];
-    executor.transform =  translate(0,5,-15) * scale(4, 4, 4) * rotate(0,1,0, 1.6) ;
+    executor.transform =  translate(0,10,-12) * scale(4.5, 4.5, 4.5) * rotate(0,1,0, 1.6) ;
     gInstances.push_back(executor);
     imperio.push_back(executor);
 
@@ -880,7 +914,7 @@ void GLWidget::AtualizaLaser()
 
     lasers = temp;
 
-    if(lasers.size() <= 12)
+    if(lasers.size() <= 12 || rand()%10 < 1 )
     {
         CalculaLaser();
     }
@@ -1057,6 +1091,18 @@ void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
 
             break;
         }
+
+    case Qt::Key_6:
+    {
+        fix_cam = false;
+        xWing_Sound-> stop();
+
+        gCamera.setPosition(glm::vec3(9,20,108));
+
+        gCamera.lookAt(glm::vec3(10,7,0));
+
+        break;
+    }
 
         case Qt::Key_Escape:
         {
