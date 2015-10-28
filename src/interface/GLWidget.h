@@ -69,6 +69,8 @@ public:
     std::list<ModelInstance> imp;
     std::list<ModelInstance> reb;
 
+    ModelInstance vader;
+
 public slots:
     void showGrid(bool);
 
@@ -92,12 +94,6 @@ private:
     void CreateInstances();
     void RenderInstance(const ModelInstance& inst);
 
-	void drawGrid();
-	void drawAxis(GLfloat *mat);
-	void drawBackground();
-	void shotPicking(QMouseEvent *event);
-	void processHits(GLint hits, GLuint buffer[]);
-	void loadProjection();
 
     tdogl::Camera gCamera;
     QTimer *simTimer;
@@ -112,6 +108,7 @@ private:
     Phonon::MediaObject *war;
     Phonon::MediaObject *xWing_Sound;
     Phonon::MediaObject *tieFighter_Sound;
+    Phonon::MediaObject *tieFighter_Engine;
     Phonon::MediaObject *empire_Alert_Sound;
 
     std::vector<Light> gLights;

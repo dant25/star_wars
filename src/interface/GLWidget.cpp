@@ -31,6 +31,7 @@ GLWidget::GLWidget(QWidget *parent)
     Phonon::MediaSource tiros = Phonon::MediaSource(":/sounds/resources/Space Battle Background.mp3");
     Phonon::MediaSource xWingSound = Phonon::MediaSource(":/sounds/resources/X Wing Ambient Engine Sound.mp3");
     Phonon::MediaSource tieFighterSound = Phonon::MediaSource(":/sounds/resources/TIE Fighter roar.mp3");
+    Phonon::MediaSource tieFighterEngine = Phonon::MediaSource(":/sounds/resources/TIE Fighter Engine.mp3");
     Phonon::MediaSource empireAlertSound = Phonon::MediaSource(":/sounds/resources/Imperial Alert - Siren Sound.mp3");
 
     music = Phonon::createPlayer(Phonon::MusicCategory, fundo);
@@ -43,6 +44,8 @@ GLWidget::GLWidget(QWidget *parent)
 
     empire_Alert_Sound = Phonon::createPlayer(Phonon::MusicCategory, empireAlertSound);
 
+    tieFighter_Engine = Phonon::createPlayer(Phonon::MusicCategory, tieFighterEngine);
+
 
     // setup gCamera
     gCamera.setPosition(glm::vec3(9,20,108));
@@ -51,6 +54,9 @@ GLWidget::GLWidget(QWidget *parent)
     gCamera.setViewportAspectRatio(screen_size.x / screen_size.y);
     gCamera.setNearAndFarPlanes(0.1f, 800.0f);
     gCamera.lookAt(glm::vec3(10,7,0));
+    //gCamera.setHorizontalAngle(0);
+    //gCamera.setHorizontalAngle(0);
+
 
     // setup lights
     Light spotlight;
@@ -85,6 +91,7 @@ GLWidget::~GLWidget()
     delete war;
     delete xWing_Sound;
     delete tieFighter_Sound;
+    delete tieFighter_Engine;
     delete empire_Alert_Sound;
 }
 
@@ -178,6 +185,9 @@ void GLWidget::initializeGL()
     LoadOBJ( "../../resources/Lua.obj", "../../resources/lua.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
              0, 800.0, glm::vec3(0.3f, 0.3f, 0.3f), true );
 
+    LoadOBJ( "../../resources/SuperTie.obj", "../../resources/dark.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+             0, 800.0, glm::vec3(0.3f, 0.3f, 0.3f), true );
+
     CreateInstances();
 
     CalculaLaser();
@@ -197,8 +207,6 @@ void GLWidget::paintGL()
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //gInstances.front().setTransform( rotate(0,1,0, gDegreesRotated) );
 
     // render all the instances
     std::list<ModelInstance>::const_iterator it;
@@ -222,6 +230,27 @@ void GLWidget::paintGL()
     {
         RenderInstance( (*it) );
     }
+
+
+    ///Nave do Dart Vader
+    float angF = glm::acos( glm::dot({0, 0, -1.0}, gCamera.forward() ) );
+    float angR = glm::acos( glm::dot({0, 1, 0}, gCamera.up()) );
+
+    if(gCamera.forward().x > 0.0)
+        angF *= -1.0;
+
+    if(gCamera.forward().y < 0.0)
+        angR *= -1.0;
+
+    vader.transform =  translate(gCamera.position().x + gCamera.forward().x*5,
+                                 gCamera.position().y + gCamera.forward().y*5 - 1,
+                                 gCamera.position().z + gCamera.forward().z*5 )
+                        * scale(2.5, 2.5, 2.5)
+                        * rotate(0,1,0, angF )
+                        * rotate(1,0,0, angR )
+                        * rotate(0,1,0, 3.141592);
+
+    RenderInstance( vader );
 }
 
 void GLWidget::simStep()
@@ -277,7 +306,9 @@ void GLWidget::simStep()
         count +=5;
     }
 
-//std::cout << gCamera.position().x << " " << gCamera.position().y << " " << gCamera.position().z << std::endl;
+//std::cout << "POS: " << gCamera.position().x << " " << gCamera.position().y << " " << gCamera.position().z << std::endl;
+//std::cout << "LOOK AT: " << gCamera.forward().x << " " << gCamera.forward().y << " " << gCamera.forward().z << std::endl;
+
 
     ///REPOSICIONANDO A CAMERA
     if(fix_cam)
@@ -305,6 +336,29 @@ void GLWidget::simStep()
             tieFighter_Sound->play();
         }
 
+        glm::vec3 posVader = glm::vec3(vader.transform[3][0], vader.transform[3][1], vader.transform[3][2]);
+        for(it = reb.begin(); it != reb.end(); ++it)
+        {
+            glm::vec3 posReb = glm::vec3((*it).transform[3][0], (*it).transform[3][1], (*it).transform[3][2]);
+
+            if( glm::abs(posVader.x - posReb.x) < 8.0 && glm::abs(posVader.y - posReb.y) < 8.0 && glm::abs(posVader.z - posReb.z) < 8.0 &&
+                !fix_cam )
+            {
+                tieFighter_Sound->play();
+            }
+        }
+        for(it = imp.begin(); it != imp.end(); ++it)
+        {
+            glm::vec3 posImp = glm::vec3((*it).transform[3][0], (*it).transform[3][1], (*it).transform[3][2]);
+
+            if( glm::abs(posVader.x - posImp.x) < 8.0 && glm::abs(posVader.y - posImp.y) < 8.0 && glm::abs(posVader.z - posImp.z) < 8.0 &&
+                !fix_cam )
+            {
+                tieFighter_Sound->play();
+            }
+        }
+
+
         glm::vec3 posExecutor = glm::vec3(imperio.back().transform[3][0], imperio.back().transform[3][1], imperio.back().transform[3][2]);
         glm::vec3 distan = posExecutor - gCamera.position();
 
@@ -315,6 +369,8 @@ void GLWidget::simStep()
 
         if(fix_cam)
             xWing_Sound->play();
+        else
+            tieFighter_Engine->play();
 
         war->play();
         music->play();
@@ -692,6 +748,9 @@ void GLWidget::CreateInstances() {
     falcon.transform =  translate(20,15, 50) * scale(0.5, 0.5, 0.5) * rotate(0,1,0, 135);
     gInstances.push_back(falcon);
     rebeldes.push_back(falcon);
+
+    vader.asset = &this->modelos[13];
+    vader.transform =  translate(gCamera.position().x, gCamera.position().y - 1.5, gCamera.position().z - 6) * scale(2.5, 2.5, 2.5) * rotate(0,1,0, 3.141592);
 }
 
 void GLWidget::CalculaLaser()
@@ -941,7 +1000,6 @@ void GLWidget::resizeGL(int width, int height)
 
     gCamera.setViewportAspectRatio(screen_size.x / screen_size.y);
 
-    loadProjection();
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -982,37 +1040,6 @@ void GLWidget::wheelEvent(QWheelEvent* event)
 
 
     updateGL();
-}
-
-void GLWidget::drawGrid()
-{
-
-}
-
-void GLWidget::drawAxis(GLfloat *mat)
-{
-
-}
-
-void GLWidget::drawBackground()
-{    
-
-}
-
-
-void GLWidget::shotPicking(QMouseEvent *event)
-{
-
-}
-
-void GLWidget::processHits(GLint , GLuint buffer[])
-{
-
-}
-
-void GLWidget::loadProjection()
-{
-
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent *keyEvent)
@@ -1081,13 +1108,13 @@ void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
 
         case Qt::Key_5:
         {
-
             fix_cam = !fix_cam;
 
             if(fix_cam)
-                xWing_Sound->play();
+                tieFighter_Engine-> stop();
             else
                 xWing_Sound-> stop();
+
 
             break;
         }
@@ -1100,6 +1127,8 @@ void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
         gCamera.setPosition(glm::vec3(9,20,108));
 
         gCamera.lookAt(glm::vec3(10,7,0));
+        //gCamera.setHorizontalAngle(0);
+        //gCamera.setHorizontalAngle(0);
 
         break;
     }
