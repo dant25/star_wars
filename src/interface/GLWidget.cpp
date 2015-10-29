@@ -185,7 +185,7 @@ void GLWidget::initializeGL()
     LoadOBJ( "../../resources/Lua.obj", "../../resources/lua.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
              0, 800.0, glm::vec3(0.3f, 0.3f, 0.3f), true );
 
-    LoadOBJ( "../../resources/SuperTie.obj", "../../resources/dark.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
+    LoadOBJ( "../../resources/SuperTie.obj", "../../resources/vaderTex.png", "../../resources/vertex-shader.txt", "../../resources/fragment-shader.txt",
              0, 800.0, glm::vec3(0.3f, 0.3f, 0.3f), true );
 
     CreateInstances();
