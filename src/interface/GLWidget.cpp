@@ -13,26 +13,14 @@
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer  | QGL::SampleBuffers | QGL::StencilBuffer), parent)
 {
-    /*
-    Phonon::MediaObject *mediaObject = new Phonon::MediaObject();
-    Phonon::MediaObject *metaInformationResolver;
-    Phonon::AudioOutput *audioOutput;
-
-    QString fileName(":/sounds/resources/Star Wars Battle Theme FULL.mp3");
-    mediaObject->setCurrentSource(fileName);
-    audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
-    mediaObject = new Phonon::MediaObject(this);
-    audioOutput->setVolume(100.0f);
-    Phonon::createPath(mediaObject, audioOutput);
-    mediaObject->play();
-*/
-
     Phonon::MediaSource fundo = Phonon::MediaSource(":/sounds/resources/Star Wars Battle Theme FULL.mp3");
     Phonon::MediaSource tiros = Phonon::MediaSource(":/sounds/resources/Space Battle Background.mp3");
     Phonon::MediaSource xWingSound = Phonon::MediaSource(":/sounds/resources/X Wing Ambient Engine Sound.mp3");
     Phonon::MediaSource tieFighterSound = Phonon::MediaSource(":/sounds/resources/TIE Fighter roar.mp3");
     Phonon::MediaSource tieFighterEngine = Phonon::MediaSource(":/sounds/resources/TIE Fighter Engine.mp3");
     Phonon::MediaSource empireAlertSound = Phonon::MediaSource(":/sounds/resources/Imperial Alert - Siren Sound.mp3");
+    Phonon::MediaSource laserSound = Phonon::MediaSource(":/sounds/resources/X wing blaster sound.mp3");
+
 
     music = Phonon::createPlayer(Phonon::MusicCategory, fundo);
 
@@ -46,6 +34,7 @@ GLWidget::GLWidget(QWidget *parent)
 
     tieFighter_Engine = Phonon::createPlayer(Phonon::MusicCategory, tieFighterEngine);
 
+    laser_Sound = Phonon::createPlayer(Phonon::MusicCategory, laserSound);
 
     // setup gCamera
     gCamera.setPosition(glm::vec3(9,20,108));
@@ -106,7 +95,7 @@ glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
 }
 
 // convenience function that returns a scaling matrix
-glm::mat4 rotate(int x, int y, int z, GLfloat ang) {
+glm::mat4 rotate(GLfloat x, GLfloat y, GLfloat z, GLfloat ang) {
     return glm::rotate(glm::mat4(), (ang), glm::vec3(x,y,z));
 }
 
@@ -233,22 +222,29 @@ void GLWidget::paintGL()
 
 
     ///Nave do Dart Vader
-    float angF = glm::acos( glm::dot({0, 0, -1.0}, gCamera.forward() ) );
-    float angR = glm::acos( glm::dot({0, 1, 0}, gCamera.up()) );
+    if(!fix_cam)
+    {
+            float angF = ( glm::acos( glm::dot({0.0, 0.0, -1.0}, gCamera.forward() ) ) );
+            float angR = ( glm::acos( glm::dot({0.0, 1.0, 0.0}, gCamera.up() ) ) );
 
-    if(gCamera.forward().x > 0.0)
-        angF *= -1.0;
+            if(gCamera.forward().x > 0.00001)
+                angF = -angF;
 
-    if(gCamera.forward().y < 0.0)
-        angR *= -1.0;
+            if(gCamera.up().z < 0.00001)
+                angR = -angR;
 
-    vader.transform =  translate(gCamera.position().x + gCamera.forward().x*5,
-                                 gCamera.position().y + gCamera.forward().y*5 - 1,
-                                 gCamera.position().z + gCamera.forward().z*5 )
-                        * scale(2.5, 2.5, 2.5)
-                        * rotate(0,1,0, angF )
-                        * rotate(1,0,0, angR )
-                        * rotate(0,1,0, 3.141592);
+            if(gCamera.forward().z > 0.00001)
+                angR = -angR;
+
+            vader.transform =  translate(gCamera.position().x + gCamera.forward().x*5,
+                                         gCamera.position().y + gCamera.forward().y*5 - 1,
+                                         gCamera.position().z + gCamera.forward().z*5 )
+                                * scale(2.5, 2.5, 2.5)
+                                * rotate( 0, 1, 0, angF)
+                                * rotate( 1, 0, 0, angR)
+                                * rotate(0.0, 1.0, 0.0, M_PI);
+
+    }
 
     RenderInstance( vader );
 }
@@ -276,34 +272,34 @@ void GLWidget::simStep()
 
     gInstances.front().transform =  translate(100,0,-90) * scale(20.0, 20.0, 20.0) * rotate(0.0, 1.0, 0.0, rotLua);
 
-    int count = 0;
+    float count = 0.0;
     std::list<ModelInstance>::iterator it;
     for(it = imp.begin(); it != imp.end(); ++it)
     {
-        if(count%2 == 0)
-            (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90 - count,0 - count,10 - count)
+        if( (int)count % 2 == 0)
+            (*it).transform = translate(-40.0 - count,0.0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90.0 - count,0 - count,10 - count)
                                 * scale(1.5, 1.5, 1.5) * rotate(0.0, 0.0, 1.0, 10*rotLua);
         else
-            (*it).transform = translate(-40 - count/2.0,0 - count/2.0,-110 - count/2.0) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90 - count/2.0,0 - count/2.0,10 - count/2.0)
+            (*it).transform = translate(-40 - count/2.0,0 - count/2.0,-110 - count/2.0) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90.0 - count/2.0,0 - count/2.0,10 - count/2.0)
                                 * scale(1.5, 1.5, 1.5) * rotate(0.0, 0.0, 1.0, 10*rotLua);
-        count +=5;
+        count += 5.0;
     }
 
-    count =0;
+    count = 0.0;
     for(it = reb.begin(); it != reb.end(); ++it)
     {
 //        (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count,0 - count,0 - count)
 //                                * scale(0.8, 0.8, 0.8) * rotate(0.0, 1.0, 0.0, 3.1415) * rotate(0.0, 0.0, 1.0, rotNave);
-        if(count%2 == 0)
-            (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count,0 - count,0 - count)
+        if( (int)count%2 == 0 )
+            (*it).transform = translate(-40 - count,0 - count,-110 - count) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90.0 - count,0 - count,0 - count)
                                 * scale(0.8, 0.8, 0.8) * rotate(0.0, 1.0, 0.0, 3.1415) * rotate(0.0, 0.0, 1.0, rotNave);
         else
         {
-            (*it).transform = translate(-40 - count/2.0,0 - count/2.0,-110 - count/2.0) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.0, 1.0, 0.0, 2*rotLua) * translate(-90 - count/2.0,0 - count/2.0,0 - count/2.0)
+            (*it).transform = translate(-40 - count/2.0,0 - count/2.0,-110 - count/2.0) * rotate(0.0, 0.0, 1.0, rotNave) * rotate(0.5, 1.0, 0.5, 2*rotLua) * translate(-90.0 - count/2.0,0 - count/2.0,0 - count/2.0)
                                 * scale(0.8, 0.8, 0.8) * rotate(0.0, 1.0, 0.0, 3.1415) * rotate(0.0, 0.0, 1.0, rotNave);
         }
 
-        count +=5;
+        count += 5.0;
     }
 
 //std::cout << "POS: " << gCamera.position().x << " " << gCamera.position().y << " " << gCamera.position().z << std::endl;
@@ -313,15 +309,15 @@ void GLWidget::simStep()
     ///REPOSICIONANDO A CAMERA
     if(fix_cam)
     {
-        std::list<ModelInstance>::iterator itR = reb.begin(); itR++;
-        std::list<ModelInstance>::iterator itE = imp.begin(); itE++;
         double t = 1.5;
-        glm::vec3 pos(t*( (*itR).transform[3][0] - (*itE).transform[3][0] ),
-                3+t*( (*itR).transform[3][1] - (*itE).transform[3][1] ),
-                t*( (*itR).transform[3][2] - (*itE).transform[3][2] ) );
+        glm::vec3 pos(t*( reb.front().transform[3][0] - imp.front().transform[3][0] ),
+                3+t*( reb.front().transform[3][1] - imp.front().transform[3][1] ),
+                t*( reb.front().transform[3][2] - imp.front().transform[3][2] ) );
 
-        gCamera.setPosition( glm::vec3((*itR).transform[3][0], (*itR).transform[3][1], (*itR).transform[3][2]) + pos );
-        gCamera.lookAt( glm::vec3((*itE).transform[3][0], (*itE).transform[3][1], (*itE).transform[3][2]) );
+//gCamera.setPosition( glm::vec3(reb.front().transform[3][0] + pos.x, reb.front().transform[3][1] + pos.y, reb.front().transform[3][2]) + pos.z);
+
+        gCamera.setPosition( glm::vec3(reb.front().transform[3][0], reb.front().transform[3][1], reb.front().transform[3][2]) + pos );
+        gCamera.lookAt( glm::vec3(imp.front().transform[3][0], imp.front().transform[3][1], imp.front().transform[3][2]) );
     }
 
 
@@ -369,8 +365,8 @@ void GLWidget::simStep()
 
         if(fix_cam)
             xWing_Sound->play();
-        else
-            tieFighter_Engine->play();
+        //else
+            //tieFighter_Engine->play();
 
         war->play();
         music->play();
@@ -750,7 +746,7 @@ void GLWidget::CreateInstances() {
     rebeldes.push_back(falcon);
 
     vader.asset = &this->modelos[13];
-    vader.transform =  translate(gCamera.position().x, gCamera.position().y - 1.5, gCamera.position().z - 6) * scale(2.5, 2.5, 2.5) * rotate(0,1,0, 3.141592);
+    vader.transform =  translate(gCamera.position().x, gCamera.position().y - 1.5, gCamera.position().z - 6) * scale(2.5, 2.5, 2.5) * rotate(0,1,0, M_PI);
 }
 
 void GLWidget::CalculaLaser()
@@ -878,7 +874,7 @@ void GLWidget::CalculaLaser()
         double t = 10.0;
         posEmp = {reb.transform[3][0] + t*(imp.transform[3][0] - reb.transform[3][0])
                 , reb.transform[3][1] + t*(imp.transform[3][1] - reb.transform[3][1])
-                , reb.transform[3][2] + t*(imp.transform[3][2] -reb.transform[3][2]) };
+                , reb.transform[3][2] + t*(imp.transform[3][2] - reb.transform[3][2]) };
 
 
         posReb = {reb.transform[3][0], reb.transform[3][1], reb.transform[3][2]};
@@ -909,12 +905,12 @@ void GLWidget::CalculaLaser()
 
         int ajusteX = 1.0;
 
-        if( glm::cross(pos, delta).y < 0 )
+        if( glm::cross(pos, delta).y < 0.0 )
         {
             ajusteX = -1.0;
             //cout << "NEG " << endl;
 
-            if( glm::cross({0,1,0}, delta).z > 0 )
+            if( glm::cross({0,1,0}, delta).z > 0.0 )
             {
                 ajusteZ = -1.0;
             }
@@ -924,7 +920,7 @@ void GLWidget::CalculaLaser()
         {
             //cout << "POS " << endl;
 
-            if( glm::cross({0,1,0}, delta).z > 0 )
+            if( glm::cross({0,1,0}, delta).z > 0.0 )
             {
                 ajusteZ = -1.0;
             }
@@ -981,16 +977,6 @@ void GLWidget::AtualizaLaser()
     updateGL();
 }
 
-void GLWidget::showGrid(bool s)
-{
-
-}
-
-void GLWidget::setPerspective(bool s)
-{
-
-}
-
 void GLWidget::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -1015,7 +1001,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     double mouseX = event->x();
     double mouseY = event->y();
 
-    gCamera.offsetOrientation( mouseSensitivity * glm::radians( (( (float)mouseY - (float)posY )) ), mouseSensitivity * glm::radians((( (float)mouseX) - (float)posX )) );
+    angY = glm::radians( ( ( (float)mouseY - (float)posY ) ) );
+    angX = glm::radians( ( ( (float)mouseX - (float)posX ) ) );
+
+    gCamera.offsetOrientation( mouseSensitivity * angY, mouseSensitivity * angX );
 
     posX =  mouseX;
     posY =  mouseY;
@@ -1083,6 +1072,46 @@ void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
             gCamera.offsetPosition(moveSpeed * glm::vec3(0,1,0));
             break;
         }
+
+    case Qt::Key_Space:
+    {
+        if( fix_cam )
+            break;
+
+        laser_Sound->play();
+
+        glm::vec3 posVader = {vader.transform[3][0], vader.transform[3][1], vader.transform[3][2]};
+        glm::vec3 posFinal = {posVader.x + 30*(gCamera.forward().x)
+                            , posVader.y + 30*(gCamera.forward().y)
+                            , posVader.z + 30*(gCamera.forward().z) };
+        glm::vec3 delta = posFinal - posVader;
+
+        glm::vec3 pos = {0.0, 1.0, 0.0};
+
+        delta = glm::normalize(delta);
+        float dot = glm::dot(pos, gCamera.forward());
+        float ang = glm::acos(dot);
+
+        ModelInstance laser;
+        laser.asset = &this->modelos[9];
+        laser.transform =  translate( posVader.x, posVader.y, posVader.z) * rotate( gCamera.right().x, gCamera.right().y, gCamera.right().z, -ang)  * scale(0.4, 4.0, 0.4) ;
+
+
+        Raio r;
+        r.laser = laser;
+        r.delta = ( glm::vec3(delta.x*2.3, delta.y*2.3, delta.z*2.3) );
+        {
+            r.chegada = posFinal;
+        }
+
+
+        lasers.push_back(r);
+
+        break;
+    }
+
+
+
 
         case Qt::Key_1:
         {

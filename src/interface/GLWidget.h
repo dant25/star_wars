@@ -36,6 +36,8 @@ using namespace std;
 #include "importer.h"
 #include "Light.h"
 
+#include "Quaternions.h"
+
 struct Raio
 {
     ModelInstance laser;
@@ -72,10 +74,6 @@ public:
     ModelInstance vader;
 
 public slots:
-    void showGrid(bool);
-
-    void setPerspective(bool);
-
     void simStep();
 
 protected:
@@ -100,6 +98,7 @@ private:
 
     glm::vec2 screen_size = {800, 600};
     double posX, posY;
+    double angX,angY;
     double rotLua;
     double rotNave;
 
@@ -110,6 +109,7 @@ private:
     Phonon::MediaObject *tieFighter_Sound;
     Phonon::MediaObject *tieFighter_Engine;
     Phonon::MediaObject *empire_Alert_Sound;
+    Phonon::MediaObject *laser_Sound;
 
     std::vector<Light> gLights;
 

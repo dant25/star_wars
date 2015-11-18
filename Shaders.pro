@@ -39,7 +39,8 @@ HEADERS += src/controler.h \
     src/Shader.h \
     src/ShadersControler.h \
     src/stb_image.h \
-    src/Texture.h
+    src/Texture.h \
+    src/Quaternions.h
 FORMS += src/interface/mainwindow.ui
 SOURCES += src/controler.cpp \
            src/interface/GLWidget.cpp \
@@ -54,7 +55,8 @@ SOURCES += src/controler.cpp \
     src/Program.cpp \
     src/Shader.cpp \
     src/ShadersControler.cpp \
-    src/Texture.cpp
+    src/Texture.cpp \
+    src/Quaternions.cpp
 
 OTHER_FILES += \
     resources/fragment-shader.txt \
