@@ -26,6 +26,8 @@ using namespace std;
 
 #include <phonon/phonon>
 
+#include <QLabel>
+
 // tdogl classes
 #include "Program.h"
 #include "Texture.h"
@@ -73,6 +75,8 @@ public:
 
     ModelInstance vader;
 
+    QLabel *label;
+
 public slots:
     void simStep();
 
@@ -103,6 +107,7 @@ private:
     double rotNave;
 
     bool fix_cam;
+    bool start;
     Phonon::MediaObject *music;
     Phonon::MediaObject *war;
     Phonon::MediaObject *xWing_Sound;
@@ -110,6 +115,7 @@ private:
     Phonon::MediaObject *tieFighter_Engine;
     Phonon::MediaObject *empire_Alert_Sound;
     Phonon::MediaObject *laser_Sound;
+    Phonon::MediaObject *intro_Sound;
 
     std::vector<Light> gLights;
 

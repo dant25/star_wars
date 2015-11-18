@@ -11,17 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    controler = new Controler();
-
-    //setCursor(Qt::BlankCursor);
-    //QApplication::setOverrideCursor(Qt::BlankCursor);
-
-    QCursor c = cursor();
-    c.setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
-/*    c.setShape(Qt::BlankCursor);
-    setCursor(c);*/
-
-
+    ui->glwidget->label = ui->label;
 }
 
 MainWindow::~MainWindow()

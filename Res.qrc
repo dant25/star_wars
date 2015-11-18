@@ -7,5 +7,10 @@
         <file>resources/TIE Fighter Engine.mp3</file>
         <file>resources/Imperial Alert - Siren Sound.mp3</file>
         <file>resources/X wing blaster sound.mp3</file>
+        <file>resources/Star wars  Theme Song.mp3</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file>resources/capa01.jpg</file>
+        <file>resources/capa02.jpg</file>
     </qresource>
 </RCC>

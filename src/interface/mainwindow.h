@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "controler.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -22,7 +21,6 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    Controler *controler;
 };
 
 #endif // MAINWINDOW_H

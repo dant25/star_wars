@@ -20,7 +20,7 @@ GLWidget::GLWidget(QWidget *parent)
     Phonon::MediaSource tieFighterEngine = Phonon::MediaSource(":/sounds/resources/TIE Fighter Engine.mp3");
     Phonon::MediaSource empireAlertSound = Phonon::MediaSource(":/sounds/resources/Imperial Alert - Siren Sound.mp3");
     Phonon::MediaSource laserSound = Phonon::MediaSource(":/sounds/resources/X wing blaster sound.mp3");
-
+    Phonon::MediaSource introSound = Phonon::MediaSource(":/sounds/resources/Star wars  Theme Song.mp3");
 
     music = Phonon::createPlayer(Phonon::MusicCategory, fundo);
 
@@ -35,6 +35,12 @@ GLWidget::GLWidget(QWidget *parent)
     tieFighter_Engine = Phonon::createPlayer(Phonon::MusicCategory, tieFighterEngine);
 
     laser_Sound = Phonon::createPlayer(Phonon::MusicCategory, laserSound);
+
+    intro_Sound = Phonon::createPlayer(Phonon::MusicCategory, introSound);
+
+    intro_Sound->play();
+
+    start = false;
 
     // setup gCamera
     gCamera.setPosition(glm::vec3(9,20,108));
@@ -82,6 +88,8 @@ GLWidget::~GLWidget()
     delete tieFighter_Sound;
     delete tieFighter_Engine;
     delete empire_Alert_Sound;
+    delete laser_Sound;
+    delete intro_Sound;
 }
 
 // convenience function that returns a translation matrix
@@ -251,6 +259,9 @@ void GLWidget::paintGL()
 
 void GLWidget::simStep()
 {
+    if(!start)
+        return;
+
     double ti,tf,tempo; // ti = tempo inicial // tf = tempo final
     ti = tf = tempo = 0;
     timeval tempo_inicio,tempo_fim;
@@ -986,16 +997,41 @@ void GLWidget::resizeGL(int width, int height)
 
     gCamera.setViewportAspectRatio(screen_size.x / screen_size.y);
 
+    if( start == false )
+    {
+        this->label->setMinimumHeight( height );
+        this->label->setMinimumWidth( width );
+
+        this->label->setMaximumHeight( height );
+        this->label->setMaximumWidth( width );
+    }
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     posX =  event->x();
     posY =  event->y();
+
+    float coordX = 0.814542;        //VALORES ACHADOS
+    float coordY = 0.770771;        //VALORES ACHADOS
+
+    float pX = event->x()/screen_size[0];
+    float pY = event->y()/screen_size[1];
+
+    if( sqrt( pow( pX-coordX, 2.0 ) + pow( pY-coordY, 2.0 ) ) < 0.05 )
+    {
+        intro_Sound->stop();
+        start = true;
+        label->clear();
+        delete label;
+    }
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    if(!start)
+        return;
+
     //rotate camera based on mouse movement
     const float mouseSensitivity = 4.0f;
     double mouseX = event->x();
@@ -1038,6 +1074,9 @@ void GLWidget::keyReleaseEvent(QKeyEvent *keyEvent)
 
 void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
 {
+    if(!start)
+        return;
+
     const float moveSpeed = 1.0; //units per second
 
     switch(keyEvent->key())

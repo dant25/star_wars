@@ -26,7 +26,7 @@ INCLUDEPATH += . src src/interface
 LIBS += -lGLEW -lglfw3 -lGL -lX11 -lXi -lXrandr -lXxf86vm -lXinerama -lXcursor -lrt -lm -pthread
 
 # Input
-HEADERS += src/controler.h \
+HEADERS += \
            src/interface/GLWidget.h \
            src/interface/mainwindow.h \
     src/Bitmap.h \
@@ -42,7 +42,7 @@ HEADERS += src/controler.h \
     src/Texture.h \
     src/Quaternions.h
 FORMS += src/interface/mainwindow.ui
-SOURCES += src/controler.cpp \
+SOURCES += \
            src/interface/GLWidget.cpp \
            src/interface/main.cpp \
            src/interface/mainwindow.cpp \
