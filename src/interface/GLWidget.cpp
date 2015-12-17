@@ -260,7 +260,10 @@ void GLWidget::paintGL()
 void GLWidget::simStep()
 {
     if(!start)
+    {
+        intro_Sound->play();
         return;
+    }
 
     double ti,tf,tempo; // ti = tempo inicial // tf = tempo final
     ti = tf = tempo = 0;

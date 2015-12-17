@@ -12,5 +12,6 @@
     <qresource prefix="/images">
         <file>resources/capa01.jpg</file>
         <file>resources/capa02.jpg</file>
+        <file>resources/icon.jpg</file>
     </qresource>
 </RCC>
