@@ -40,6 +40,8 @@ GLWidget::GLWidget(QWidget *parent)
 
     intro_Sound->play();
 
+    paint_vader = true;
+
     start = false;
 
     // setup gCamera
@@ -254,7 +256,8 @@ void GLWidget::paintGL()
 
     }
 
-    RenderInstance( vader );
+    if(paint_vader)
+        RenderInstance( vader );
 }
 
 void GLWidget::simStep()
@@ -1201,6 +1204,12 @@ void GLWidget::keyPressEvent(QKeyEvent *keyEvent)
         //gCamera.setHorizontalAngle(0);
         //gCamera.setHorizontalAngle(0);
 
+        break;
+    }
+
+    case Qt::Key_7:
+    {
+        paint_vader = !paint_vader;
         break;
     }
 

@@ -108,6 +108,7 @@ private:
 
     bool fix_cam;
     bool start;
+    bool paint_vader;
     Phonon::MediaObject *music;
     Phonon::MediaObject *war;
     Phonon::MediaObject *xWing_Sound;
